@@ -1,0 +1,210 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>Pawan_selenium_Challages</groupId>
+  <artifactId>Pawan_selenium_Challages</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <properties>
+    <java.version>1.8</java.version> <!-- Java 17 is the latest LTS version -->
+    <junit.version>5.10.0</junit.version> <!-- JUnit 5 (JUnit Jupiter) -->
+    <cucumber.version>7.15.0</cucumber.version> <!-- Latest stable Cucumber version -->
+    <maven.compiler.version>3.11.0</maven.compiler.version> <!-- Use the latest Maven Compiler plugin -->
+    <vertx.version>4.6.2</vertx.version> <!-- Latest Vert.x version -->
+    <selenium.version>4.14.0</selenium.version> <!-- Latest Selenium version -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+</properties>
+<build>
+    <testResources>
+        <testResource>
+            <directory>src/test/resources</directory>
+            <filtering>true</filtering>
+        </testResource>
+    </testResources>
+
+    <plugins>
+        <!-- Maven Compiler Plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${maven.compiler.version}</version>
+            <configuration>
+                <encoding>UTF-8</encoding>
+                <source>${java.version}</source>
+                <target>${java.version}</target>
+                <compilerArgument>-Werror</compilerArgument>
+            </configuration>
+        </plugin>
+
+        <!-- Maven Shade Plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.5.0</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                    <configuration>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <manifestEntries>
+                                    <Main-Class>io.vertx.core.Starter</Main-Class>
+                                    <Main-Verticle>skeleton.MyFirstVerticle</Main-Verticle>
+                                </manifestEntries>
+                            </transformer>
+                        </transformers>
+                        <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-fat.jar</outputFile>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- Build Helper Maven Plugin -->
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+                <execution>
+                    <id>reserve-network-port</id>
+                    <goals>
+                        <goal>reserve-network-port</goal>
+                    </goals>
+                    <phase>process-sources</phase>
+                    <configuration>
+                        <portNames>
+                            <portName>http.port</portName>
+                        </portNames>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- Maven Antrun Plugin -->
+        <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+                <execution>
+                    <id>start-vertx-app</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                        <goal>run</goal>
+                    </goals>
+                    <configuration>
+                        <target>
+                            <exec executable="${java.home}/bin/java" dir="${project.build.directory}" spawn="true">
+                                <arg value="-jar"/>
+                                <arg value="${project.artifactId}-${project.version}-fat.jar"/>
+                                <arg value="-conf"/>
+                                <arg value="${project.build.directory}/test-classes/my-it-config.json"/>
+                            </exec>
+                        </target>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>stop-vertx-app</id>
+                    <phase>post-integration-test</phase>
+                    <goals>
+                        <goal>run</goal>
+                    </goals>
+                    <configuration>
+                        <target>
+                            <exec executable="bash" dir="${project.build.directory}" spawn="false">
+                                <arg value="-c"/>
+                                <arg value="ps ax | grep -Ei '[\\-]DtestPort=${http.port}\\s+\\-jar\\s+${project.artifactId}' | awk 'NR==1{print $1}' | xargs kill -SIGTERM"/>
+                            </exec>
+                        </target>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+        <!-- Maven Failsafe Plugin -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.1.2</version>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>integration-test</goal>
+                        <goal>verify</goal>
+                    </goals>
+                    <configuration>
+                        <systemProperties>
+                            <http.port>${http.port}</http.port>
+                        </systemProperties>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+<dependencies>
+    <!-- Cucumber Dependencies -->
+    <dependency>
+        <groupId>io.cucumber</groupId>
+        <artifactId>cucumber-java</artifactId>
+        <version>7.15.0</version> <!-- Latest stable Cucumber version -->
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>io.cucumber</groupId>
+        <artifactId>cucumber-junit</artifactId>
+        <version>7.15.0</version> <!-- Latest stable Cucumber version -->
+        <scope>test</scope>
+    </dependency>
+
+    <!-- Selenium -->
+    <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-java</artifactId>
+        <version>4.14.0</version> <!-- Latest Selenium version -->
+        <scope>test</scope>
+    </dependency>
+
+    <!-- JUnit -->
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.10.0</version> <!-- Latest JUnit version -->
+        <scope>test</scope>
+    </dependency>
+
+ 
+
+    <!-- Database -->
+    <dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>2.7.2</version> <!-- Latest HSQLDB version -->
+    </dependency>
+
+    <!-- Logging -->
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>1.4.11</version> <!-- Latest Logback version -->
+    </dependency>
+
+    <!-- REST-Assured -->
+    <dependency>
+        <groupId>io.rest-assured</groupId>
+        <artifactId>rest-assured</artifactId>
+        <version>5.4.0</version> <!-- Latest REST-Assured version -->
+        <scope>test</scope>
+    </dependency>
+
+    <!-- AssertJ -->
+    <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>3.24.2</version> <!-- Latest AssertJ version -->
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+</project>
