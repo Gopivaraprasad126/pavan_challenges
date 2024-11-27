@@ -21,19 +21,19 @@ public class Alerts {
 		/*1)
 		Alert alert = driver.switchTo().alert();
 		alert.accept();*/
-		//2)Explicit wait
+		/*Explicit wait
 		Alert alert = driver.switchTo().alert();
 		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
 		wait.until(ExpectedConditions.alertIsPresent());
-		alert.accept(); 
+		alert.accept(); */
 		
-	/*3)using JavaScriptExecutor
+	//a3)using JavaScriptExecutor
 	JavascriptExecutor js = (JavascriptExecutor)driver;
 	try {
 	js.executeScript("window.alert=function{};");
 	}
 	catch(Exception e) {
 		
-	}*/
+	}
 	}
 }
