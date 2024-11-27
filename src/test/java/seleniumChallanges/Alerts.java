@@ -18,14 +18,14 @@ public class Alerts {
 		driver.get("https:testautomationpractice.blogspot.com");
 		driver.manage().window().maximize();
 		driver.findElement(By.xpath("//button[@id='alertBtn']")).click();
-		/*1)
+		
 		Alert alert = driver.switchTo().alert();
-		alert.accept();*/
+		alert.accept();
 		//2)Explicit wait
-		Alert alert = driver.switchTo().alert();
+		/*Alert alert = driver.switchTo().alert();
 		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(10));
 		wait.until(ExpectedConditions.alertIsPresent());
-		alert.accept(); 
+		alert.accept(); */
 		
 	/*3)using JavaScriptExecutor
 	JavascriptExecutor js = (JavascriptExecutor)driver;
